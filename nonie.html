@@ -72,10 +72,28 @@
             color: black;
             text-decoration: none;
         }
-        /* 主担当部屋が太字になるスタイル */
-        .primary-room {
+        
+        /* 結果の部屋番号タグのスタイル */
+        .room-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            margin: 2px;
+            border-radius: 4px;
+            color: white;
+            font-size: 0.9em;
+            line-height: 1.5;
             font-weight: bold;
         }
+        .col-1 { background-color: #2563eb; } /* blue-600 */
+        .col-2 { background-color: #16a34a; } /* green-600 */
+        .col-3 { background-color: #ea580c; } /* orange-600 */
+        .col-4 { background-color: #9333ea; } /* purple-600 */
+        
+        /* 主担当部屋が太字になるスタイル */
+        .primary-room {
+            box-shadow: 0 0 0 2px white, 0 0 0 4px #ef4444; /* red-500 glow */
+        }
+
         /* ボタンのローディングアニメーション */
         .loader {
             border: 2px solid #f3f3f3;
@@ -221,41 +239,50 @@
                 const label = document.createElement('label');
                 label.className = 'room-checkbox-label';
                 label.setAttribute('for', `${namePrefix}-${room}`);
-
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.id = `${namePrefix}-${room}`;
                 checkbox.value = room;
                 checkbox.className = 'hidden';
-
                 label.append(checkbox, document.createTextNode(room));
                 container.appendChild(label);
-
                 if (callback) {
                     callback(checkbox, label);
                 }
             }
         };
 
+        const shuffleArray = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+
+        const getAssignmentSignature = (assignment) => {
+            return Object.keys(assignment).sort().map(nurse => {
+                const rooms = [...assignment[nurse]].sort((a, b) => a - b).join(',');
+                return `${nurse}:${rooms}`;
+            }).join(';');
+        };
+
         const onGenerateClick = () => {
             generateButton.disabled = true;
             generateButtonText.innerHTML = '<span class="loader"></span>計算中...';
-            resultContainer.innerHTML = `<div class="text-center p-8"><div class="font-bold text-lg">割り当てを計算しています...</div><p class="text-gray-600">候補の探索には数秒かかる場合があります。</p></div>`;
+            resultContainer.innerHTML = `<div class="text-center p-8"><div class="font-bold text-lg">割り当てを計算しています...</div></div>`;
 
             setTimeout(() => {
-                const searchContext = { timedOut: false };
                 try {
                     const nurses = getNurseNames();
                     if (nurses.length < 3 || nurses.length > 8) {
                         alert('看護師の数は3人から8人の範囲で入力してください。');
                         return;
                     }
-
                     const emptyRooms = getEmptyRooms();
                     const availableRooms = ALL_ROOMS.filter(room => !emptyRooms.includes(room));
-
-                    const assignments = {};
-                    nurses.forEach(nurse => { assignments[nurse] = []; });
+                    const initialAssignmentsTemplate = {};
+                    nurses.forEach(nurse => { initialAssignmentsTemplate[nurse] = []; });
                     let roomsToAssign = [...availableRooms];
 
                     for (const nurseName in primaryAssignments) {
@@ -266,36 +293,36 @@
                                     return;
                                 }
                             }
-                            assignments[nurseName] = [...primaryAssignments[nurseName]];
+                            initialAssignmentsTemplate[nurseName] = [...primaryAssignments[nurseName]];
                             roomsToAssign = roomsToAssign.filter(room => !primaryAssignments[nurseName].includes(room));
                         }
                     }
 
-                    const allCombinations = [];
-                    const initialAssignmentState = {
-                        assignments,
-                        unassignedRooms: roomsToAssign.sort((a, b) => a - b)
-                    };
-
+                    const allFoundAssignments = [];
+                    const seenSignatures = new Set();
                     const startTime = Date.now();
-                    const TIME_LIMIT = 8000; // 8 seconds
+                    const DURATION = 2000; // 2秒間計算
 
-                    findCombinationsRecursive(initialAssignmentState, nurses, allCombinations, startTime, TIME_LIMIT, searchContext);
+                    while (Date.now() - startTime < DURATION) {
+                        const shuffledRooms = shuffleArray([...roomsToAssign]);
+                        const initialAssignments = JSON.parse(JSON.stringify(initialAssignmentsTemplate));
 
-                    const uniqueCombinations = getUniqueAssignments(allCombinations);
-                    const scoredCandidates = uniqueCombinations.map(assignment => ({
+                        let newAssignment = generateGreedyAssignment(nurses, shuffledRooms, initialAssignments);
+                        newAssignment = balanceAssignments(newAssignment);
+
+                        const signature = getAssignmentSignature(newAssignment);
+                        if (!seenSignatures.has(signature)) {
+                            seenSignatures.add(signature);
+                            allFoundAssignments.push(newAssignment);
+                        }
+                    }
+                    
+                    const scoredCandidates = allFoundAssignments.map(assignment => ({
                         assignment,
                         score: scoreAssignment(assignment)
                     })).sort((a, b) => b.score - a.score);
 
                     displayResults(scoredCandidates.slice(0, 3));
-                    
-                    if (searchContext.timedOut) {
-                         const warning = document.createElement('div');
-                         warning.className = 'text-center p-4 mb-4 bg-orange-100 border border-orange-300 rounded-lg text-orange-800';
-                         warning.textContent = '計算に時間がかかりすぎたため、一部の候補のみを探索しました。より良い候補が存在する可能性があります。';
-                         resultContainer.prepend(warning);
-                    }
 
                 } catch (e) {
                     console.error('An error occurred during generation:', e);
@@ -307,33 +334,132 @@
             }, 10);
         };
 
-        const findCombinationsRecursive = (state, nurses, allCombinations, startTime, timeLimit, context) => {
-            if (context.timedOut) return;
-            if (Date.now() - startTime > timeLimit) {
-                context.timedOut = true;
-                return;
-            }
-            if (allCombinations.length > 5000) return;
+        const generateGreedyAssignment = (nurses, roomsToAssign, initialAssignments) => {
+            const assignments = JSON.parse(JSON.stringify(initialAssignments));
+            const unassignedRooms = [...roomsToAssign]; // Use the shuffled list
 
-            if (state.unassignedRooms.length === 0) {
-                if (isValidAssignment(state.assignments)) {
-                    allCombinations.push(JSON.parse(JSON.stringify(state.assignments)));
+            while (unassignedRooms.length > 0) {
+                const room = unassignedRooms.shift();
+                let bestNurse = null;
+                let bestScore = -Infinity;
+
+                for (const nurse of nurses) {
+                    const score = calculateGoodness(nurse, room, assignments);
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestNurse = nurse;
+                    }
                 }
-                return;
-            }
 
-            const roomToAssign = state.unassignedRooms[0];
-            const remainingRooms = state.unassignedRooms.slice(1);
-
-            for (const nurse of nurses) {
-                const newAssignments = JSON.parse(JSON.stringify(state.assignments));
-                newAssignments[nurse].push(roomToAssign);
-
-                if (isPromising(newAssignments)) {
-                    const newState = { assignments: newAssignments, unassignedRooms: remainingRooms };
-                    findCombinationsRecursive(newState, nurses, allCombinations, startTime, timeLimit, context);
+                if (bestNurse) {
+                    assignments[bestNurse].push(room);
+                } else {
+                    let minRoomsNurse = nurses[0];
+                    for (let i = 1; i < nurses.length; i++) {
+                        if (assignments[nurses[i]].length < assignments[minRoomsNurse].length) {
+                            minRoomsNurse = nurses[i];
+                        }
+                    }
+                    assignments[minRoomsNurse].push(room);
                 }
             }
+            return assignments;
+        };
+
+        const calculateGoodness = (nurse, roomToAdd, currentAssignments) => {
+            let score = 0;
+            const nurseRooms = currentAssignments[nurse];
+            const nurseColumns = getColumnsForNurse(nurseRooms);
+            const roomColumn = roomToColumnMap[roomToAdd];
+            const newColumnsSet = new Set([...nurseColumns, roomColumn]);
+
+            // 1. Column Cohesion Score: 導線の効率性を評価
+            if (nurseColumns.includes(roomColumn)) {
+                score += 30; // 既存の列への追加を最優先
+            } else if (newColumnsSet.size <= 2) {
+                score += 15; // 2列目までの追加を許容
+                const sorted = Array.from(newColumnsSet).sort((a, b) => a - b);
+                if (newColumnsSet.size === 2 && ((sorted[0] === 1 && sorted[1] === 4) || (sorted[0] === 2 && sorted[1] === 3))) {
+                    score += 10; // 推奨される列の組み合わせであれば更に加点
+                }
+            } else {
+                const primaryColumns = getColumnsForNurse(primaryAssignments[nurse]);
+                if (primaryColumns.length <= 2) {
+                    score -= 1000; // 主担当の例外を除き、3列目以上になるのを強く抑制
+                }
+            }
+
+            // 2. Room Count Balancing Score: 部屋数の均等性を評価
+            const currentCounts = Object.values(currentAssignments).map(r => r.length);
+            const maxCount = Math.max(...currentCounts);
+            const myCount = nurseRooms.length;
+            score += (maxCount - myCount) * 20; // 部屋数が少ない看護師への割り当てを強く推奨
+
+            return score;
+        };
+
+        const balanceAssignments = (assignments) => {
+            let balancedAssignment = JSON.parse(JSON.stringify(assignments));
+            let maxIterations = 20; // Safety break to prevent infinite loops
+
+            while (maxIterations-- > 0) {
+                const roomCounts = Object.values(balancedAssignment).map(r => r.length);
+                const maxRooms = Math.max(...roomCounts);
+                const minRooms = Math.min(...roomCounts);
+
+                if (maxRooms - minRooms <= 2) {
+                    break; // Balanced
+                }
+
+                const overloadedNurses = Object.keys(balancedAssignment).filter(n => balancedAssignment[n].length === maxRooms);
+                const underloadedNurses = Object.keys(balancedAssignment).filter(n => balancedAssignment[n].length === minRooms);
+
+                let bestMove = { from: null, to: null, room: null, score: -Infinity };
+
+                for (const fromNurse of overloadedNurses) {
+                    for (const roomToMove of balancedAssignment[fromNurse]) {
+                        if ((primaryAssignments[fromNurse] || []).includes(roomToMove)) {
+                            continue; // Cannot move a primary assigned room
+                        }
+                        for (const toNurse of underloadedNurses) {
+                            const score = calculateMoveScore(fromNurse, toNurse, roomToMove, balancedAssignment);
+                            if (score > bestMove.score) {
+                                bestMove = { from: fromNurse, to: toNurse, room: roomToMove, score: score };
+                            }
+                        }
+                    }
+                }
+
+                if (bestMove.from) {
+                    balancedAssignment[bestMove.from] = balancedAssignment[bestMove.from].filter(r => r !== bestMove.room);
+                    balancedAssignment[bestMove.to].push(bestMove.room);
+                } else {
+                    break; // No valid moves found
+                }
+            }
+            return balancedAssignment;
+        };
+
+        const calculateMoveScore = (fromNurse, toNurse, roomToMove, assignments) => {
+            let score = 0;
+            const roomColumn = roomToColumnMap[roomToMove];
+
+            // Evaluate impact on destination nurse (toNurse)
+            const toNurseColumns = getColumnsForNurse(assignments[toNurse]);
+            if (toNurseColumns.includes(roomColumn)) {
+                score += 20; // Great: moves to an existing column
+            } else if (toNurseColumns.length < 2) {
+                score += 10; // Good: creates a second column
+            }
+
+            // Evaluate impact on source nurse (fromNurse)
+            const fromNurseRooms = assignments[fromNurse];
+            const fromNurseColumnsAfterMove = getColumnsForNurse(fromNurseRooms.filter(r => r !== roomToMove));
+            if (fromNurseColumnsAfterMove.length < getColumnsForNurse(fromNurseRooms).length) {
+                score -= 5; // Penalty for breaking up a column grouping
+            }
+
+            return score;
         };
         
         const getColumnsForNurse = (rooms) => {
@@ -343,32 +469,6 @@
                 columns.add(roomToColumnMap[room]);
             }
             return Array.from(columns);
-        };
-
-        const isValidAssignment = (assignment) => {
-            const roomCounts = Object.values(assignment).map(rooms => rooms.length);
-            if (Math.max(...roomCounts) - Math.min(...roomCounts) > 2) {
-                return false;
-            }
-            for (const nurse in assignment) {
-                const columns = getColumnsForNurse(assignment[nurse]);
-                const primaryColumns = getColumnsForNurse(primaryAssignments[nurse]);
-                if (columns.length > 2 && primaryColumns.length <= 2) {
-                    return false;
-                }
-            }
-            return true;
-        };
-
-        const isPromising = (assignment) => {
-             for (const nurse in assignment) {
-                const columns = getColumnsForNurse(assignment[nurse]);
-                const primaryColumns = getColumnsForNurse(primaryAssignments[nurse]);
-                if (columns.length > 2 && primaryColumns.length <= 2) {
-                    return false;
-                }
-            }
-            return true;
         };
 
         const scoreAssignment = (assignment) => {
@@ -392,31 +492,11 @@
             }
             return score;
         };
-
-        const getAssignmentSignature = (assignment) => {
-            return Object.keys(assignment).sort().map(nurse => {
-                const rooms = [...assignment[nurse]].sort((a, b) => a - b).join(',');
-                return `${nurse}:${rooms}`;
-            }).join(';');
-        };
-        
-        const getUniqueAssignments = (assignmentsList) => {
-            const uniqueAssignments = [];
-            const seenSignatures = new Set();
-            for (const assignment of assignmentsList) {
-                const signature = getAssignmentSignature(assignment);
-                if (!seenSignatures.has(signature)) {
-                    seenSignatures.add(signature);
-                    uniqueAssignments.push(assignment);
-                }
-            }
-            return uniqueAssignments;
-        };
         
         const displayResults = (candidates) => {
             resultContainer.innerHTML = '';
             if (candidates.length === 0) {
-                resultContainer.innerHTML = `<div class="text-center p-8 bg-yellow-100 border border-yellow-300 rounded-lg"><h3 class="text-xl font-bold text-yellow-800">条件を満たす割り当て候補が見つかりませんでした。</h3><p class="text-yellow-700 mt-2">看護師の人数や空き部屋、主担当の設定を見直して再度お試しください。</p></div>`;
+                resultContainer.innerHTML = `<div class="text-center p-8 bg-yellow-100 border border-yellow-300 rounded-lg"><h3 class="text-xl font-bold text-yellow-800">条件を満たす割り当て候補が見つかりませんでした。</h3><p class="text-yellow-700 mt-2">設定を見直して再度お試しください。</p></div>`;
                 return;
             }
 
@@ -447,15 +527,17 @@
                 for (const nurse of sortedNurses) {
                     const nurseRooms = assignment[nurse].sort((a,b) => a - b);
                     const nursePrimaryRooms = primaryAssignments[nurse] || [];
-                    const roomsHtml = nurseRooms.map(room => 
-                        nursePrimaryRooms.includes(room) ? `<span class="primary-room">${room}</span>` : room
-                    ).join(', ');
+                    const roomsHtml = nurseRooms.map(room => {
+                        const columnClass = `col-${roomToColumnMap[room]}`;
+                        const primaryClass = nursePrimaryRooms.includes(room) ? 'primary-room' : '';
+                        return `<span class="room-tag ${columnClass} ${primaryClass}">${room}</span>`;
+                    }).join('');
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td class="p-3 border-b border-gray-200">${nurse}</td>
+                        <td class="p-3 border-b border-gray-200 align-top">${nurse}</td>
                         <td class="p-3 border-b border-gray-200">${roomsHtml}</td>
-                        <td class="p-3 border-b border-gray-200 text-center">${nurseRooms.length}</td>
+                        <td class="p-3 border-b border-gray-200 text-center align-top">${nurseRooms.length}</td>
                     `;
                     tbody.appendChild(tr);
                 }
