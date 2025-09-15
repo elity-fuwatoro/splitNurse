@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +12,7 @@
         body {
             font-family: 'Hiragino Kaku Gothic ProN', 'メイリオ', Meiryo, sans-serif;
         }
+
         .room-checkbox-label {
             display: flex;
             align-items: center;
@@ -22,14 +24,21 @@
             transition: all 0.2s;
             user-select: none;
         }
+
         .room-checkbox-label.checked {
-            background-color: #fca5a5; /* red-300 */
-            border-color: #ef4444; /* red-500 */
-            color: #7f1d1d; /* red-900 */
+            background-color: #fca5a5;
+            /* red-300 */
+            border-color: #ef4444;
+            /* red-500 */
+            color: #7f1d1d;
+            /* red-900 */
         }
+
         .room-checkbox-label:hover {
-            background-color: #fee2e2; /* red-100 */
+            background-color: #fee2e2;
+            /* red-100 */
         }
+
         .modal {
             display: none;
             position: fixed;
@@ -39,9 +48,10 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0, 0, 0, 0.5);
             animation: fadeIn 0.3s;
         }
+
         .modal-content {
             background-color: #fefefe;
             margin: 10% auto;
@@ -52,14 +62,29 @@
             border-radius: 0.5rem;
             animation: slideIn 0.3s;
         }
+
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
+
         @keyframes slideIn {
-            from { transform: translateY(-50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
+
         .close-button {
             color: #aaa;
             float: right;
@@ -67,17 +92,76 @@
             font-weight: bold;
             cursor: pointer;
         }
+
         .close-button:hover,
         .close-button:focus {
             color: black;
             text-decoration: none;
         }
+
+        /* 結果の部屋番号タグのスタイル */
+        .room-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            margin: 2px;
+            border-radius: 4px;
+            color: white;
+            font-size: 0.9em;
+            line-height: 1.5;
+            font-weight: bold;
+        }
+
+        .col-1 {
+            background-color: #2563eb;
+        }
+
+        /* blue-600 */
+        .col-2 {
+            background-color: #16a34a;
+        }
+
+        /* green-600 */
+        .col-3 {
+            background-color: #ea580c;
+        }
+
+        /* orange-600 */
+        .col-4 {
+            background-color: #9333ea;
+        }
+
+        /* purple-600 */
+
         /* 主担当部屋が太字になるスタイル */
         .primary-room {
-            font-weight: bold;
+            box-shadow: 0 0 0 2px white, 0 0 0 4px #ef4444;
+            /* red-500 glow */
+        }
+
+        /* ボタンのローディングアニメーション */
+        .loader {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
+
 <body class="bg-gray-100 text-gray-800 p-4 sm:p-6 md:p-8">
 
     <div class="max-w-7xl mx-auto bg-white p-6 rounded-2xl shadow-lg">
@@ -94,8 +178,11 @@
                 <!-- 左側：看護師・空き部屋入力 -->
                 <div class="space-y-6 bg-gray-50 p-6 rounded-xl border">
                     <div>
-                        <label for="nurse-names" class="block text-lg font-semibold mb-2 text-gray-700">1. 看護師名を入力</label>
-                        <textarea id="nurse-names" rows="5" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="田中
+                        <label for="nurse-names" class="block text-lg font-semibold mb-2 text-gray-700">1.
+                            看護師名を入力</label>
+                        <textarea id="nurse-names" rows="5"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                            placeholder="田中
 佐藤
 鈴木
 (改行して入力)"></textarea>
@@ -113,7 +200,8 @@
                 <div class="space-y-6 bg-gray-50 p-6 rounded-xl border">
                     <div>
                         <h2 class="text-lg font-semibold mb-2 text-gray-700">3. 主担当の部屋を設定</h2>
-                        <button id="open-primary-modal-button" class="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 transition shadow-md">
+                        <button id="open-primary-modal-button"
+                            class="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 transition shadow-md">
                             主担当を設定する
                         </button>
                         <div id="primary-assignments-display" class="mt-4 space-y-2 text-sm">
@@ -123,8 +211,9 @@
 
                     <div class="pt-4 border-t">
                         <h2 class="text-lg font-semibold mb-2 text-gray-700">4. 割り当てを実行</h2>
-                        <button id="generate-button" class="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-600 transition shadow-md text-xl">
-                            割り当て候補を生成
+                        <button id="generate-button"
+                            class="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-600 transition shadow-md text-xl flex items-center justify-center">
+                            <span id="generate-button-text">割り当て候補を生成</span>
                         </button>
                     </div>
                 </div>
@@ -142,7 +231,7 @@
         <div class="modal-content">
             <span class="close-button" id="close-modal-button">&times;</span>
             <h2 class="text-2xl font-bold mb-6">主担当設定</h2>
-            
+
             <div class="mb-4">
                 <label for="primary-nurse-select" class="block text-md font-medium mb-2">看護師を選択</label>
                 <select id="primary-nurse-select" class="w-full p-2 border border-gray-300 rounded-lg">
@@ -158,45 +247,53 @@
             </div>
 
             <div class="flex justify-end space-x-4">
-                 <button id="clear-primary-button" class="bg-yellow-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-yellow-600 transition">選択クリア</button>
-                <button id="save-primary-button" class="bg-green-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-600 transition">保存</button>
+                <button id="clear-primary-button"
+                    class="bg-yellow-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-yellow-600 transition">選択クリア</button>
+                <button id="save-primary-button"
+                    class="bg-green-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-600 transition">保存</button>
             </div>
         </div>
     </div>
 
 
     <script>
-        // ES5準拠で記述
-        (function() {
+        (function () { // グローバルスコープの汚染を防ぐための即時実行関数
             'use strict';
 
-            // --- 定数定義 ---
             var ROOM_LAYOUT = {
                 1: [1, 2, 3, 5, 6, 7, 8, 10],
                 2: [11, 12, 13, 15, 16, 17, 18],
                 3: [20, 21, 22, 23, 25, 26, 27, 28],
                 4: [30, 31, 32, 33]
             };
-            var ALL_ROOMS = [].concat(ROOM_LAYOUT[1], ROOM_LAYOUT[2], ROOM_LAYOUT[3], ROOM_LAYOUT[4]);
-            ALL_ROOMS.sort(function(a, b) { return a - b; });
 
-            // 部屋番号から列を取得するヘルパー
+            // ES5互換の方法でALL_ROOMSを生成
+            var roomValues = [];
+            for (var key in ROOM_LAYOUT) {
+                if (ROOM_LAYOUT.hasOwnProperty(key)) {
+                    roomValues.push(ROOM_LAYOUT[key]);
+                }
+            }
+            var ALL_ROOMS = [].concat.apply([], roomValues).sort(function (a, b) { return a - b; });
+
             var roomToColumnMap = {};
             for (var col in ROOM_LAYOUT) {
                 if (ROOM_LAYOUT.hasOwnProperty(col)) {
-                    for (var i = 0; i < ROOM_LAYOUT[col].length; i++) {
-                        roomToColumnMap[ROOM_LAYOUT[col][i]] = parseInt(col, 10);
+                    var roomsInCol = ROOM_LAYOUT[col];
+                    for (var i = 0; i < roomsInCol.length; i++) {
+                        var room = roomsInCol[i];
+                        roomToColumnMap[room] = parseInt(col, 10);
                     }
                 }
             }
 
-            // --- グローバル変数 ---
-            var primaryAssignments = {}; // { '看護師名': [部屋番号1, 部屋番号2] }
+            var primaryAssignments = {};
 
-            // --- DOM要素取得 ---
+            // DOM要素の取得
             var nurseNamesTextarea = document.getElementById('nurse-names');
             var emptyRoomsContainer = document.getElementById('empty-rooms-container');
             var generateButton = document.getElementById('generate-button');
+            var generateButtonText = document.getElementById('generate-button-text');
             var resultContainer = document.getElementById('result-container');
             var modal = document.getElementById('primary-nurse-modal');
             var openModalButton = document.getElementById('open-primary-modal-button');
@@ -207,27 +304,7 @@
             var clearPrimaryButton = document.getElementById('clear-primary-button');
             var primaryAssignmentsDisplay = document.getElementById('primary-assignments-display');
 
-
-            // --- 初期化処理 ---
-            function initialize() {
-                // 空き部屋チェックボックスを生成
-                createRoomCheckboxes(emptyRoomsContainer, 'empty-room', function(checkbox, label) {
-                    checkbox.addEventListener('change', function() {
-                        label.classList.toggle('checked', checkbox.checked);
-                    });
-                });
-                // モーダル内の部屋チェックボックスを生成
-                createRoomCheckboxes(primaryRoomsContainer, 'primary-room', function(checkbox, label) {
-                    checkbox.addEventListener('change', function() {
-                        label.classList.toggle('bg-blue-200', checkbox.checked);
-                    });
-                });
-                
-                setupEventListeners();
-            }
-
-            // 部屋チェックボックス生成
-            function createRoomCheckboxes(container, namePrefix, callback) {
+            var createRoomCheckboxes = function (container, namePrefix, callback) {
                 container.innerHTML = '';
                 for (var i = 0; i < ALL_ROOMS.length; i++) {
                     var room = ALL_ROOMS[i];
@@ -249,361 +326,306 @@
                         callback(checkbox, label);
                     }
                 }
-            }
-            
-            // --- イベントリスナー設定 ---
-            function setupEventListeners() {
-                generateButton.addEventListener('click', onGenerateClick);
-                openModalButton.addEventListener('click', onOpenModalClick);
-                closeModalButton.addEventListener('click', closeModal);
-                window.addEventListener('click', function(event) {
-                    if (event.target === modal) {
-                        closeModal();
-                    }
-                });
-                savePrimaryButton.addEventListener('click', onSavePrimaryClick);
-                primaryNurseSelect.addEventListener('change', onPrimaryNurseSelectChange);
-                clearPrimaryButton.addEventListener('click', onClearPrimaryClick);
-            }
+            };
 
-            // --- モーダル関連の処理 ---
-            function onOpenModalClick() {
-                var nurses = getNurseNames();
-                if (nurses.length === 0) {
-                    alert('先に看護師名を入力してください。');
-                    return;
+            var shuffleArray = function (array) {
+                for (var i = array.length - 1; i > 0; i--) {
+                    var j = Math.floor(Math.random() * (i + 1));
+                    var temp = array[i];
+                    array[i] = array[j];
+                    array[j] = temp;
                 }
-                
-                primaryNurseSelect.innerHTML = '<option value="">--選択してください--</option>';
-                for (var i = 0; i < nurses.length; i++) {
-                    var option = document.createElement('option');
-                    option.value = nurses[i];
-                    option.textContent = nurses[i];
-                    primaryNurseSelect.appendChild(option);
-                }
-                
-                resetPrimaryRoomCheckboxes();
-                modal.style.display = 'block';
-            }
+                return array;
+            };
 
-            function closeModal() {
-                modal.style.display = 'none';
-            }
+            var getAssignmentSignature = function (assignment) {
+                return Object.keys(assignment).sort().map(function (nurse) {
+                    var rooms = assignment[nurse].slice().sort(function (a, b) { return a - b; }).join(',');
+                    return nurse + ':' + rooms;
+                }).join(';');
+            };
 
-            function onPrimaryNurseSelectChange() {
-                resetPrimaryRoomCheckboxes();
-                var selectedNurse = primaryNurseSelect.value;
-                if (selectedNurse && primaryAssignments[selectedNurse]) {
-                    var assignedRooms = primaryAssignments[selectedNurse];
-                    for (var i = 0; i < assignedRooms.length; i++) {
-                        var roomNum = assignedRooms[i];
-                        var checkbox = document.getElementById('primary-room-' + roomNum);
-                        if (checkbox) {
-                            checkbox.checked = true;
-                            checkbox.parentNode.classList.add('bg-blue-200');
+            var onGenerateClick = function () {
+                generateButton.disabled = true;
+                generateButtonText.innerHTML = '<span class="loader"></span>計算中...';
+                resultContainer.innerHTML = '<div class="text-center p-8"><div class="font-bold text-lg">割り当てを計算しています...</div></div>';
+
+                setTimeout(function () {
+                    try {
+                        var nurses = getNurseNames();
+                        if (nurses.length < 3 || nurses.length > 8) {
+                            alert('看護師の数は3人から8人の範囲で入力してください。');
+                            return;
                         }
-                    }
-                }
-            }
-            
-            function onClearPrimaryClick() {
-                resetPrimaryRoomCheckboxes();
-            }
+                        var emptyRooms = getEmptyRooms();
+                        var availableRooms = ALL_ROOMS.filter(function (room) {
+                            return emptyRooms.indexOf(room) === -1;
+                        });
 
-            function onSavePrimaryClick() {
-                var selectedNurse = primaryNurseSelect.value;
-                if (!selectedNurse) {
-                    alert('看護師を選択してください。');
-                    return;
-                }
+                        var initialAssignmentsTemplate = {};
+                        nurses.forEach(function (nurse) { initialAssignmentsTemplate[nurse] = []; });
 
-                var checkedRooms = [];
-                var checkboxes = primaryRoomsContainer.getElementsByTagName('input');
-                for (var i = 0; i < checkboxes.length; i++) {
-                    if (checkboxes[i].checked) {
-                        checkedRooms.push(parseInt(checkboxes[i].value, 10));
-                    }
-                }
+                        var roomsToAssign = availableRooms.slice();
 
-                // 他の看護師が担当している部屋は設定できない
-                for (var nurse in primaryAssignments) {
-                    if (nurse !== selectedNurse) {
-                        for(var j = 0; j < primaryAssignments[nurse].length; j++) {
-                            if (checkedRooms.indexOf(primaryAssignments[nurse][j]) > -1) {
-                                alert('エラー: 部屋 ' + primaryAssignments[nurse][j] + ' は ' + nurse + ' さんの主担当に設定されています。');
-                                return;
+                        for (var nurseName in primaryAssignments) {
+                            if (primaryAssignments.hasOwnProperty(nurseName) && nurses.indexOf(nurseName) !== -1) {
+                                var pRooms = primaryAssignments[nurseName];
+                                for (var i = 0; i < pRooms.length; i++) {
+                                    var pRoom = pRooms[i];
+                                    if (availableRooms.indexOf(pRoom) === -1) {
+                                        alert('エラー: ' + nurseName + 'さんの主担当部屋(' + pRoom + ')が空き部屋に設定されています。');
+                                        return;
+                                    }
+                                }
+                                initialAssignmentsTemplate[nurseName] = primaryAssignments[nurseName].slice();
+                                roomsToAssign = roomsToAssign.filter(function (room) {
+                                    return primaryAssignments[nurseName].indexOf(room) === -1;
+                                });
                             }
                         }
+
+                        var allFoundAssignments = [];
+                        var seenSignatures = {}; // Setの代わりにObjectを使用
+                        var startTime = Date.now();
+                        var DURATION = 2000; // 2秒間計算
+
+                        while (Date.now() - startTime < DURATION) {
+                            var shuffledRooms = shuffleArray(roomsToAssign.slice());
+                            var initialAssignments = JSON.parse(JSON.stringify(initialAssignmentsTemplate));
+
+                            var newAssignment = generateGreedyAssignment(nurses, shuffledRooms, initialAssignments);
+                            newAssignment = balanceAssignments(newAssignment);
+
+                            var signature = getAssignmentSignature(newAssignment);
+                            if (!seenSignatures[signature]) {
+                                seenSignatures[signature] = true;
+                                allFoundAssignments.push(newAssignment);
+                            }
+                        }
+
+                        var scoredCandidates = allFoundAssignments.map(function (assignment) {
+                            return {
+                                assignment: assignment,
+                                score: scoreAssignment(assignment)
+                            };
+                        }).sort(function (a, b) { return b.score - a.score; });
+
+                        displayResults(scoredCandidates.slice(0, 3));
+
+                    } catch (e) {
+                        console.error('An error occurred during generation:', e);
+                        resultContainer.innerHTML = '<div class="text-center p-8 bg-red-100 border border-red-300 rounded-lg"><h3 class="text-xl font-bold text-red-800">エラーが発生しました</h3><p class="text-red-700 mt-2">処理中に問題が発生しました。コンソールを確認してください。</p></div>';
+                    } finally {
+                        generateButton.disabled = false;
+                        generateButtonText.innerHTML = '割り当て候補を生成';
+                    }
+                }, 10);
+            };
+
+            var generateGreedyAssignment = function (nurses, roomsToAssign, initialAssignments) {
+                var assignments = JSON.parse(JSON.stringify(initialAssignments));
+                var unassignedRooms = roomsToAssign.slice();
+
+                while (unassignedRooms.length > 0) {
+                    var room = unassignedRooms.shift();
+                    var bestNurse = null;
+                    var bestScore = -Infinity;
+
+                    for (var i = 0; i < nurses.length; i++) {
+                        var nurse = nurses[i];
+                        var score = calculateGoodness(nurse, room, assignments);
+                        if (score > bestScore) {
+                            bestScore = score;
+                            bestNurse = nurse;
+                        }
+                    }
+
+                    if (bestNurse) {
+                        assignments[bestNurse].push(room);
+                    } else {
+                        var minRoomsNurse = nurses[0];
+                        for (var j = 1; j < nurses.length; j++) {
+                            if (assignments[nurses[j]].length < assignments[minRoomsNurse].length) {
+                                minRoomsNurse = nurses[j];
+                            }
+                        }
+                        assignments[minRoomsNurse].push(room);
                     }
                 }
-                
-                if (checkedRooms.length > 0) {
-                    primaryAssignments[selectedNurse] = checkedRooms;
+                return assignments;
+            };
+
+            var calculateGoodness = function (nurse, roomToAdd, currentAssignments) {
+                var score = 0;
+                var nurseRooms = currentAssignments[nurse];
+                var nurseColumns = getColumnsForNurse(nurseRooms);
+                var roomColumn = roomToColumnMap[roomToAdd];
+
+                // Setの代わりにユニークな配列を生成
+                var tempColumns = nurseColumns.concat([roomColumn]);
+                var newColumnsSet = [];
+                for (var i = 0; i < tempColumns.length; i++) {
+                    if (newColumnsSet.indexOf(tempColumns[i]) === -1) {
+                        newColumnsSet.push(tempColumns[i]);
+                    }
+                }
+
+                if (nurseColumns.indexOf(roomColumn) !== -1) {
+                    score += 30;
+                } else if (newColumnsSet.length <= 2) {
+                    score += 15;
+                    var sorted = newColumnsSet.sort(function (a, b) { return a - b; });
+                    if (newColumnsSet.length === 2 && ((sorted[0] === 1 && sorted[1] === 4) || (sorted[0] === 2 && sorted[1] === 3))) {
+                        score += 10;
+                    }
                 } else {
-                    delete primaryAssignments[selectedNurse];
-                }
-
-                updatePrimaryAssignmentsDisplay();
-                closeModal();
-            }
-
-            function resetPrimaryRoomCheckboxes() {
-                var checkboxes = primaryRoomsContainer.getElementsByTagName('input');
-                for (var i = 0; i < checkboxes.length; i++) {
-                    checkboxes[i].checked = false;
-                    checkboxes[i].parentNode.classList.remove('bg-blue-200');
-                }
-            }
-
-            function updatePrimaryAssignmentsDisplay() {
-                primaryAssignmentsDisplay.innerHTML = '';
-                var hasAssignments = false;
-                for (var nurse in primaryAssignments) {
-                    if (primaryAssignments.hasOwnProperty(nurse) && primaryAssignments[nurse].length > 0) {
-                        hasAssignments = true;
-                        var p = document.createElement('p');
-                        var rooms = primaryAssignments[nurse].sort(function(a,b){return a-b;}).join(', ');
-                        p.innerHTML = '<span class="font-bold">' + nurse + ':</span> ' + rooms;
-                        primaryAssignmentsDisplay.appendChild(p);
+                    var primaryColumns = getColumnsForNurse(primaryAssignments[nurse]);
+                    if (primaryColumns.length <= 2) {
+                        score -= 1000;
                     }
                 }
-                if (!hasAssignments) {
-                    primaryAssignmentsDisplay.innerHTML = '<p class="text-gray-500">主担当は設定されていません。</p>';
-                }
-            }
 
-
-            // --- 入力値取得 ---
-            function getNurseNames() {
-                return nurseNamesTextarea.value.split('\n').map(function(name) {
-                    return name.trim();
-                }).filter(function(name) {
-                    return name.length > 0;
-                });
-            }
-
-            function getEmptyRooms() {
-                var rooms = [];
-                var checkboxes = emptyRoomsContainer.getElementsByTagName('input');
-                for (var i = 0; i < checkboxes.length; i++) {
-                    if (checkboxes[i].checked) {
-                        rooms.push(parseInt(checkboxes[i].value, 10));
+                var currentCounts = [];
+                for (var nurseKey in currentAssignments) {
+                    if (currentAssignments.hasOwnProperty(nurseKey)) {
+                        currentCounts.push(currentAssignments[nurseKey].length);
                     }
                 }
-                return rooms;
-            }
+                var maxCount = Math.max.apply(null, currentCounts);
+                var myCount = nurseRooms.length;
+                score += (maxCount - myCount) * 20;
 
-            // --- 割り当てロジック ---
-            function onGenerateClick() {
-                var nurses = getNurseNames();
-                if (nurses.length < 2) {
-                    alert('看護師の数は2人以上で入力してください。');
-                    return;
-                }
+                return score;
+            };
 
-                var emptyRooms = getEmptyRooms();
-                
-                var availableRooms = ALL_ROOMS.filter(function(room) {
-                    return emptyRooms.indexOf(room) === -1;
-                });
+            var balanceAssignments = function (assignments) {
+                var balancedAssignment = JSON.parse(JSON.stringify(assignments));
+                var maxIterations = 20;
 
-                // 1. 主担当の割り当て
-                var assignments = {};
-                var roomsToAssign = availableRooms.slice(); // コピーを作成
+                while (maxIterations-- > 0) {
+                    var roomCountsObj = {};
+                    for (var nurseKey in balancedAssignment) {
+                        if (balancedAssignment.hasOwnProperty(nurseKey)) {
+                            roomCountsObj[nurseKey] = balancedAssignment[nurseKey].length;
+                        }
+                    }
+                    var roomCounts = [];
+                    for (var key in roomCountsObj) {
+                        if (roomCountsObj.hasOwnProperty(key)) {
+                            roomCounts.push(roomCountsObj[key]);
+                        }
+                    }
 
-                for(var i=0; i<nurses.length; i++){
-                    assignments[nurses[i]] = [];
-                }
-                
-                for (var nurseName in primaryAssignments) {
-                    if (nurses.indexOf(nurseName) > -1) {
-                         // 主担当に設定された部屋が空き部屋でないかチェック
-                        for (var k = 0; k < primaryAssignments[nurseName].length; k++) {
-                            var pRoom = primaryAssignments[nurseName][k];
-                            if(availableRooms.indexOf(pRoom) === -1) {
-                                alert('エラー: ' + nurseName + 'さんの主担当部屋(' + pRoom + ')が空き部屋に設定されています。');
-                                return;
+                    var maxRooms = Math.max.apply(null, roomCounts);
+                    var minRooms = Math.min.apply(null, roomCounts);
+
+                    if (maxRooms - minRooms <= 2) {
+                        break;
+                    }
+
+                    var overloadedNurses = Object.keys(balancedAssignment).filter(function (n) { return balancedAssignment[n].length === maxRooms; });
+                    var underloadedNurses = Object.keys(balancedAssignment).filter(function (n) { return balancedAssignment[n].length === minRooms; });
+
+                    var bestMove = { from: null, to: null, room: null, score: -Infinity };
+
+                    for (var i = 0; i < overloadedNurses.length; i++) {
+                        var fromNurse = overloadedNurses[i];
+                        var roomsOfFromNurse = balancedAssignment[fromNurse];
+                        for (var j = 0; j < roomsOfFromNurse.length; j++) {
+                            var roomToMove = roomsOfFromNurse[j];
+                            if ((primaryAssignments[fromNurse] || []).indexOf(roomToMove) !== -1) {
+                                continue;
+                            }
+                            for (var k = 0; k < underloadedNurses.length; k++) {
+                                var toNurse = underloadedNurses[k];
+                                var score = calculateMoveScore(fromNurse, toNurse, roomToMove, balancedAssignment);
+                                if (score > bestMove.score) {
+                                    bestMove = { from: fromNurse, to: toNurse, room: roomToMove, score: score };
+                                }
                             }
                         }
-                        assignments[nurseName] = primaryAssignments[nurseName].slice();
-                        
-                        for (var j = 0; j < primaryAssignments[nurseName].length; j++) {
-                             var roomIndex = roomsToAssign.indexOf(primaryAssignments[nurseName][j]);
-                             if (roomIndex > -1) {
-                                 roomsToAssign.splice(roomIndex, 1);
-                             }
-                        }
+                    }
+
+                    if (bestMove.from) {
+                        balancedAssignment[bestMove.from] = balancedAssignment[bestMove.from].filter(function (r) { return r !== bestMove.room; });
+                        balancedAssignment[bestMove.to].push(bestMove.room);
+                    } else {
+                        break;
                     }
                 }
-                
-                // 2. 割り当て候補を探索
-                var allCombinations = [];
-                var initialAssignmentState = {
-                    assignments: assignments,
-                    unassignedRooms: roomsToAssign.sort(function(a,b){return a-b;})
-                };
-                
-                findCombinationsRecursive(initialAssignmentState, nurses, allCombinations);
+                return balancedAssignment;
+            };
 
-                // 3. 候補を評価してフィルタリング
-                var scoredCandidates = allCombinations.map(function(assignment) {
-                    return {
-                        assignment: assignment,
-                        score: scoreAssignment(assignment)
-                    };
-                });
-                
-                // スコアでソート
-                scoredCandidates.sort(function(a, b) {
-                    return b.score - a.score;
-                });
-                
-                // 4. 結果表示
-                displayResults(scoredCandidates.slice(0, 3));
-            }
+            var calculateMoveScore = function (fromNurse, toNurse, roomToMove, assignments) {
+                var score = 0;
+                var roomColumn = roomToColumnMap[roomToMove];
+                var toNurseColumns = getColumnsForNurse(assignments[toNurse]);
 
-            // 再帰的に割り当てを探索する関数
-            function findCombinationsRecursive(state, nurses, allCombinations) {
-                if (allCombinations.length > 500) return; // 無限ループや過剰な計算を防ぐ
-
-                if (state.unassignedRooms.length === 0) {
-                    // 全ての部屋が割り当てられた
-                    // ここでハードルールのチェック
-                    if (isValidAssignment(state.assignments)) {
-                         var newAssignment = JSON.parse(JSON.stringify(state.assignments)); // deep copy
-                         allCombinations.push(newAssignment);
-                    }
-                    return;
+                if (toNurseColumns.indexOf(roomColumn) !== -1) {
+                    score += 20;
+                } else if (toNurseColumns.length < 2) {
+                    score += 10;
                 }
-                
-                var roomToAssign = state.unassignedRooms[0];
-                var remainingRooms = state.unassignedRooms.slice(1);
 
-                for (var i = 0; i < nurses.length; i++) {
-                    var nurse = nurses[i];
-                    
-                    // 新しい状態を作成
-                    var newAssignments = JSON.parse(JSON.stringify(state.assignments));
-                    newAssignments[nurse].push(roomToAssign);
-                    
-                    var newState = {
-                        assignments: newAssignments,
-                        unassignedRooms: remainingRooms
-                    };
-                    
-                    // 枝刈り: 現時点でルール違反なら探索しない
-                    if (isPromising(newState.assignments)) {
-                        findCombinationsRecursive(newState, nurses, allCombinations);
+                var fromNurseRooms = assignments[fromNurse];
+                var fromNurseColumnsAfterMove = getColumnsForNurse(fromNurseRooms.filter(function (r) { return r !== roomToMove; }));
+                if (fromNurseColumnsAfterMove.length < getColumnsForNurse(fromNurseRooms).length) {
+                    score -= 5;
+                }
+
+                return score;
+            };
+
+            var getColumnsForNurse = function (rooms) {
+                var columns = [];
+                if (!rooms) return [];
+                for (var i = 0; i < rooms.length; i++) {
+                    var room = rooms[i];
+                    var col = roomToColumnMap[room];
+                    if (columns.indexOf(col) === -1) {
+                        columns.push(col);
                     }
                 }
-            }
-            
-            // 割り当てが最終的に有効かチェック (ハードルール)
-            function isValidAssignment(assignment) {
-                var roomCounts = [];
-                for(var nurse in assignment) {
-                    roomCounts.push(assignment[nurse].length);
-                }
+                return columns;
+            };
 
-                // 部屋数の差が2以内か
-                if (Math.max.apply(null, roomCounts) - Math.min.apply(null, roomCounts) > 2) {
-                    return false;
-                }
-
-                // 全員の担当列が2列以内か (物理的に不可能な場合を除く)
-                for (var nurse in assignment) {
-                    if (assignment.hasOwnProperty(nurse)) {
-                         var columns = getColumnsForNurse(assignment[nurse]);
-                         var primaryColumns = getColumnsForNurse(primaryAssignments[nurse] || []);
-                         if (columns.length > 2 && primaryColumns.length <= 2) {
-                             return false;
-                         }
-                    }
-                }
-
-                return true;
-            }
-
-            // 探索の途中で、この先見込みがあるかチェック (枝刈り)
-            function isPromising(assignment) {
-                // 現時点で担当列が3つ以上になっていたら見込みなし (物理的に不可能な場合を除く)
-                for (var nurse in assignment) {
-                    if (assignment.hasOwnProperty(nurse)) {
-                         var columns = getColumnsForNurse(assignment[nurse]);
-                         var primaryColumns = getColumnsForNurse(primaryAssignments[nurse] || []);
-                         if (columns.length > 2 && primaryColumns.length <= 2) {
-                             return false;
-                         }
-                    }
-                }
-                return true;
-            }
-
-            // 看護師の担当部屋から担当列のリストを取得
-            function getColumnsForNurse(rooms) {
-                var columns = {};
-                for(var i=0; i<rooms.length; i++) {
-                    columns[roomToColumnMap[rooms[i]]] = true;
-                }
-                return Object.keys(columns).map(Number);
-            }
-
-            // 割り当てパターンを評価する関数
-            function scoreAssignment(assignment) {
+            var scoreAssignment = function (assignment) {
                 var score = 0;
                 var roomCounts = [];
-                
-                // 評価項目1, 3
                 for (var nurse in assignment) {
                     if (assignment.hasOwnProperty(nurse)) {
                         var rooms = assignment[nurse];
                         roomCounts.push(rooms.length);
-                        var columns = getColumnsForNurse(rooms);
-
-                        // 評価1: 担当列が1列
-                        if (columns.length === 1) {
-                            score += 10;
-                        }
-                        
-                        // 評価3: 担当列が2列の場合の組み合わせ
+                        var columns = getColumnsForNurse(rooms).sort(function (a, b) { return a - b; });
+                        if (columns.length === 1) score += 10;
                         if (columns.length === 2) {
-                            columns.sort(function(a,b){return a-b;});
                             if ((columns[0] === 1 && columns[1] === 4) || (columns[0] === 2 && columns[1] === 3)) {
                                 score += 5;
                             }
                         }
                     }
                 }
-
-                // 評価項目2: 部屋数の差
-                var maxRooms = Math.max.apply(null, roomCounts);
-                var minRooms = Math.min.apply(null, roomCounts);
-                var diff = maxRooms - minRooms;
-                if (diff === 0) {
-                    score += 20;
-                } else if (diff === 1) {
-                    score += 10;
+                if (roomCounts.length > 0) {
+                    var diff = Math.max.apply(null, roomCounts) - Math.min.apply(null, roomCounts);
+                    if (diff === 0) score += 20;
+                    else if (diff === 1) score += 10;
                 }
-                
                 return score;
-            }
+            };
 
-            // --- 結果表示 ---
-            function displayResults(candidates) {
+            var displayResults = function (candidates) {
                 resultContainer.innerHTML = '';
                 if (candidates.length === 0) {
-                    resultContainer.innerHTML = '<div class="text-center p-8 bg-yellow-100 border border-yellow-300 rounded-lg"><h3 class="text-xl font-bold text-yellow-800">条件を満たす割り当て候補が見つかりませんでした。</h3><p class="text-yellow-700 mt-2">看護師の人数や空き部屋、主担当の設定を見直して再度お試しください。</p></div>';
+                    resultContainer.innerHTML = '<div class="text-center p-8 bg-yellow-100 border border-yellow-300 rounded-lg"><h3 class="text-xl font-bold text-yellow-800">条件を満たす割り当て候補が見つかりませんでした。</h3><p class="text-yellow-700 mt-2">設定を見直して再度お試しください。</p></div>';
                     return;
                 }
 
-                for (var i = 0; i < candidates.length; i++) {
-                    var candidate = candidates[i];
+                candidates.forEach(function (candidate, i) {
                     var assignment = candidate.assignment;
                     var score = candidate.score;
-
                     var container = document.createElement('div');
                     container.className = 'mb-8 bg-white p-6 rounded-xl shadow-md border';
-                    
+
                     var title = document.createElement('h3');
                     title.className = 'text-2xl font-bold mb-4 text-blue-700';
                     title.textContent = '候補' + (i + 1) + ' (スコア: ' + score + ')';
@@ -611,59 +633,176 @@
 
                     var table = document.createElement('table');
                     table.className = 'w-full text-left border-collapse';
-                    
-                    var thead = document.createElement('thead');
-                    thead.innerHTML = '<tr>' +
+                    table.innerHTML = '<thead>' +
+                        '<tr>' +
                         '<th class="p-3 bg-gray-100 border-b-2 border-gray-200 font-semibold">看護師名</th>' +
                         '<th class="p-3 bg-gray-100 border-b-2 border-gray-200 font-semibold">担当部屋</th>' +
                         '<th class="p-3 bg-gray-100 border-b-2 border-gray-200 font-semibold text-center">部屋数</th>' +
-                        '</tr>';
-                    table.appendChild(thead);
+                        '</tr>' +
+                        '</thead>';
 
                     var tbody = document.createElement('tbody');
-                    for (var nurse in assignment) {
-                        if (assignment.hasOwnProperty(nurse)) {
-                            var tr = document.createElement('tr');
-                            
-                            var tdName = document.createElement('td');
-                            tdName.className = 'p-3 border-b border-gray-200';
-                            tdName.textContent = nurse;
-                            tr.appendChild(tdName);
+                    var sortedNurses = Object.keys(assignment).sort();
 
-                            var tdRooms = document.createElement('td');
-                            tdRooms.className = 'p-3 border-b border-gray-200';
-                            
-                            // 部屋番号をソートして表示
-                            var nurseRooms = assignment[nurse].sort(function(a,b){return a-b;});
-                            var nursePrimaryRooms = primaryAssignments[nurse] || [];
+                    for (var j = 0; j < sortedNurses.length; j++) {
+                        var nurse = sortedNurses[j];
+                        var nurseRooms = assignment[nurse].sort(function (a, b) { return a - b; });
+                        var nursePrimaryRooms = primaryAssignments[nurse] || [];
+                        var roomsHtml = nurseRooms.map(function (room) {
+                            var columnClass = 'col-' + roomToColumnMap[room];
+                            var primaryClass = nursePrimaryRooms.indexOf(room) !== -1 ? 'primary-room' : '';
+                            return '<span class="room-tag ' + columnClass + ' ' + primaryClass + '">' + room + '</span>';
+                        }).join('');
 
-                            var roomsHtml = nurseRooms.map(function(room) {
-                                if (nursePrimaryRooms.indexOf(room) > -1) {
-                                    return '<span class="primary-room">' + room + '</span>';
-                                }
-                                return room;
-                            }).join(', ');
-                            tdRooms.innerHTML = roomsHtml;
-                            tr.appendChild(tdRooms);
-
-                            var tdCount = document.createElement('td');
-                            tdCount.className = 'p-3 border-b border-gray-200 text-center';
-                            tdCount.textContent = assignment[nurse].length;
-                            tr.appendChild(tdCount);
-
-                            tbody.appendChild(tr);
-                        }
+                        var tr = document.createElement('tr');
+                        tr.innerHTML = '<td class="p-3 border-b border-gray-200 align-top">' + nurse + '</td>' +
+                            '<td class="p-3 border-b border-gray-200">' + roomsHtml + '</td>' +
+                            '<td class="p-3 border-b border-gray-200 text-center align-top">' + nurseRooms.length + '</td>';
+                        tbody.appendChild(tr);
                     }
                     table.appendChild(tbody);
                     container.appendChild(table);
                     resultContainer.appendChild(container);
+                });
+            };
+
+            var getNurseNames = function () { return nurseNamesTextarea.value.split('\n').map(function (name) { return name.trim(); }).filter(Boolean); };
+            var getEmptyRooms = function () {
+                var checkedInputs = emptyRoomsContainer.querySelectorAll('input:checked');
+                var rooms = [];
+                for (var i = 0; i < checkedInputs.length; i++) {
+                    rooms.push(parseInt(checkedInputs[i].value, 10));
                 }
-            }
-            
-            // --- アプリケーション開始 ---
+                return rooms;
+            };
+
+            var setupEventListeners = function () {
+                generateButton.addEventListener('click', onGenerateClick);
+                openModalButton.addEventListener('click', onOpenModalClick);
+                closeModalButton.addEventListener('click', closeModal);
+                window.addEventListener('click', function (event) { if (event.target === modal) closeModal(); });
+                savePrimaryButton.addEventListener('click', onSavePrimaryClick);
+                primaryNurseSelect.addEventListener('change', onPrimaryNurseSelectChange);
+                clearPrimaryButton.addEventListener('click', onClearPrimaryClick);
+            };
+
+            var closeModal = function () { modal.style.display = 'none'; };
+
+            var onOpenModalClick = function () {
+                var nurses = getNurseNames();
+                if (nurses.length === 0) {
+                    alert('先に看護師名を入力してください。');
+                    return;
+                }
+                primaryNurseSelect.innerHTML = '<option value="">--選択してください--</option>';
+                nurses.forEach(function (nurse) {
+                    var option = new Option(nurse, nurse);
+                    primaryNurseSelect.add(option);
+                });
+                resetPrimaryRoomCheckboxes();
+                modal.style.display = 'block';
+            };
+
+            var resetPrimaryRoomCheckboxes = function () {
+                var checkboxes = primaryRoomsContainer.querySelectorAll('input');
+                Array.prototype.forEach.call(checkboxes, function (checkbox) {
+                    checkbox.checked = false;
+                    checkbox.parentElement.classList.remove('bg-blue-200');
+                });
+            };
+
+            var onPrimaryNurseSelectChange = function () {
+                resetPrimaryRoomCheckboxes();
+                var selectedNurse = primaryNurseSelect.value;
+                if (selectedNurse && primaryAssignments[selectedNurse]) {
+                    primaryAssignments[selectedNurse].forEach(function (roomNum) {
+                        var checkbox = document.getElementById('primary-room-' + roomNum);
+                        if (checkbox) {
+                            checkbox.checked = true;
+                            checkbox.parentElement.classList.add('bg-blue-200');
+                        }
+                    });
+                }
+            };
+
+            var onClearPrimaryClick = function () { resetPrimaryRoomCheckboxes(); };
+
+            var onSavePrimaryClick = function () {
+                var selectedNurse = primaryNurseSelect.value;
+                if (!selectedNurse) {
+                    alert('看護師を選択してください。');
+                    return;
+                }
+                var checkedInputs = primaryRoomsContainer.querySelectorAll('input:checked');
+                var checkedRooms = [];
+                for (var i = 0; i < checkedInputs.length; i++) {
+                    checkedRooms.push(parseInt(checkedInputs[i].value, 10));
+                }
+
+                for (var nurse in primaryAssignments) {
+                    if (primaryAssignments.hasOwnProperty(nurse) && nurse !== selectedNurse) {
+                        var assignedRooms = primaryAssignments[nurse];
+                        for (var j = 0; j < assignedRooms.length; j++) {
+                            var room = assignedRooms[j];
+                            if (checkedRooms.indexOf(room) !== -1) {
+                                alert('エラー: 部屋 ' + room + ' は ' + nurse + ' さんの主担当に設定されています。');
+                                return;
+                            }
+                        }
+                    }
+                }
+
+                if (checkedRooms.length > 0) {
+                    primaryAssignments[selectedNurse] = checkedRooms;
+                } else {
+                    delete primaryAssignments[selectedNurse];
+                }
+                updatePrimaryAssignmentsDisplay();
+                closeModal();
+            };
+
+            var updatePrimaryAssignmentsDisplay = function () {
+                primaryAssignmentsDisplay.innerHTML = '';
+                var assignedNurses = Object.keys(primaryAssignments).filter(function (nurse) {
+                    return primaryAssignments[nurse] && primaryAssignments[nurse].length > 0;
+                });
+
+                if (assignedNurses.length > 0) {
+                    assignedNurses.forEach(function (nurse) {
+                        var rooms = primaryAssignments[nurse].sort(function (a, b) { return a - b; }).join(', ');
+                        primaryAssignmentsDisplay.innerHTML += '<p><span class="font-bold">' + nurse + ':</span> ' + rooms + '</p>';
+                    });
+                } else {
+                    primaryAssignmentsDisplay.innerHTML = '<p class="text-gray-500">主担当は設定されていません。</p>';
+                }
+            };
+
+            var initialize = function () {
+                createRoomCheckboxes(emptyRoomsContainer, 'empty-room', function (checkbox, label) {
+                    checkbox.addEventListener('change', function () {
+                        if (checkbox.checked) {
+                            label.classList.add('checked');
+                        } else {
+                            label.classList.remove('checked');
+                        }
+                    });
+                });
+                createRoomCheckboxes(primaryRoomsContainer, 'primary-room', function (checkbox, label) {
+                    checkbox.addEventListener('change', function () {
+                        if (checkbox.checked) {
+                            label.classList.add('bg-blue-200');
+                        } else {
+                            label.classList.remove('bg-blue-200');
+                        }
+                    });
+                });
+                updatePrimaryAssignmentsDisplay();
+                setupEventListeners();
+            };
+
             initialize();
         })();
     </script>
-
 </body>
+
 </html>
